@@ -5,7 +5,7 @@ import time
 import datetime
 
 from PySide import QtCore, QtGui
-from timeTraceUI2 import Ui_MainWindow
+from timeTraceUI import Ui_MainWindow
 
 
 class timers(QtGui.QMainWindow):
@@ -15,22 +15,29 @@ class timers(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         self.clock1 = StartStopClock()
-        self.deltatime = self.clock1.lcdElapsedTimer.elapsed()
-        self.clock1delta = ElapsedTime()
-        self.clock1delta.elapsedTime(self.deltatime)
-
         self.clock2 = StartStopClock()
+        self.clock3 = StartStopClock()
+
+        self.lcdTime = QtCore.QTimer()
+        self.lcdTime.start(1000)
+
+        #self.deltatime = self.clock1.lcdElapsedTimer.elapsed()
+        #self.clock1delta = ElapsedTime()
+        #self.clock1delta.elapsedTime(self.deltatime)
 
         #buttons
-        QtCore.QObject.connect(self.ui.exit,    QtCore.SIGNAL("clicked()"), self.close)
-        QtCore.QObject.connect(self.ui.exit_2,  QtCore.SIGNAL("clicked()"), self.close)
         QtCore.QObject.connect(self.ui.stop,    QtCore.SIGNAL("clicked()"), self.clock1.stop_clock)
         QtCore.QObject.connect(self.ui.start,   QtCore.SIGNAL("clicked()"), self.clock1.start_clock)
         QtCore.QObject.connect(self.ui.stop_2,  QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
         QtCore.QObject.connect(self.ui.start_2, QtCore.SIGNAL("clicked()"), self.clock2.start_clock)
+        QtCore.QObject.connect(self.ui.stop_3,  QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
+        QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
+        QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
 
         QtCore.QObject.connect(self.clock1.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime)
         QtCore.QObject.connect(self.clock2.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime2)
+        QtCore.QObject.connect(self.clock3.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime3)
+        QtCore.QObject.connect(self.lcdTime, QtCore.SIGNAL("timeout()"), self.updtTime4)
 
 
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -42,6 +49,8 @@ class timers(QtGui.QMainWindow):
         """
         self.stimer.singleShot(1000, self.singleUpdate)
 
+    def timestore(self,timevalue):
+        pass
 
     def updtTime(self):
         currentTime1 = datetime.timedelta(seconds=self.clock1.lcdElapsedTimer.elapsed()/1000)
@@ -49,8 +58,21 @@ class timers(QtGui.QMainWindow):
 
     def updtTime2(self):
         #currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm:ss')
+        #if currentTime2 == 0:
         currentTime2 = datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
+        #else:
+        #    currentTime2 += datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
+
         self.ui.lcdNumber_2.display(str(currentTime2))
+
+    def updtTime3(self):
+        #currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm:ss')
+        currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed()/1000)
+        self.ui.lcdNumber_3.display(str(currentTime3))
+
+    def updtTime4(self):
+        currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm')
+        self.ui.lcdNumber_4.display(str(currentTime))
 
 class ElapsedTime(object):
     def elapsedTime(self,deltaTime):
