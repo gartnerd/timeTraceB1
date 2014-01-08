@@ -14,6 +14,9 @@ class timers(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        #self.c2 = 0
+        #currentTime2 = 0
+
         self.clock1 = StartStopClock()
         self.clock2 = StartStopClock()
         self.clock3 = StartStopClock()
@@ -58,10 +61,10 @@ class timers(QtGui.QMainWindow):
 
     def updtTime2(self):
         #currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm:ss')
-        #if currentTime2 == 0:
-        currentTime2 = datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
-        #else:
-        #    currentTime2 += datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
+        if self.clock2.c2 == 0:
+            currentTime2 = datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
+        else:
+            currentTime2 = datetime.timedelta(seconds=(self.clock2.lcdElapsedTimer.elapsed() + sum(self.clock2.timelist))/1000)
 
         self.ui.lcdNumber_2.display(str(currentTime2))
 
@@ -85,12 +88,16 @@ class StartStopClock(object):
     def __init__(self):
         self.lcdTimer = QtCore.QTimer()
         self.lcdElapsedTimer = QtCore.QElapsedTimer()
+        self.c2 = 0
+        self.timelist = []
 
     def start_clock(self):
         self.lcdElapsedTimer.start()
         self.lcdTimer.start(1000)
 
     def stop_clock(self):
+        self.c2 = 1
+        self.timelist.append(self.lcdElapsedTimer.elapsed())
         self.lcdTimer.stop()
 
 
