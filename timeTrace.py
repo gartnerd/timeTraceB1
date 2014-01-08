@@ -52,15 +52,11 @@ class timers(QtGui.QMainWindow):
         """
         self.stimer.singleShot(1000, self.singleUpdate)
 
-    def timestore(self,timevalue):
-        pass
-
     def updtTime(self):
         currentTime1 = datetime.timedelta(seconds=self.clock1.lcdElapsedTimer.elapsed()/1000)
         self.ui.lcdNumber.display(str(currentTime1))
 
     def updtTime2(self):
-        #currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm:ss')
         if self.clock2.c2 == 0:
             currentTime2 = datetime.timedelta(seconds=self.clock2.lcdElapsedTimer.elapsed()/1000)
         else:
@@ -69,8 +65,11 @@ class timers(QtGui.QMainWindow):
         self.ui.lcdNumber_2.display(str(currentTime2))
 
     def updtTime3(self):
-        #currentTime = QtCore.QDateTime.currentDateTime().toString('hh:mm:ss')
-        currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed()/1000)
+		if self.clock3.c2 == 0:
+			currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed()/1000)
+		else:
+			currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed() + sum(self.clock3.timlist))/1000)
+			
         self.ui.lcdNumber_3.display(str(currentTime3))
 
     def updtTime4(self):
