@@ -30,9 +30,13 @@ class timers(QtGui.QMainWindow):
 
         #buttons
         QtCore.QObject.connect(self.ui.stop,    QtCore.SIGNAL("clicked()"), self.clock1.stop_clock)
+        QtCore.QObject.connect(self.ui.stop,    QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
         QtCore.QObject.connect(self.ui.start,   QtCore.SIGNAL("clicked()"), self.clock1.start_clock)
+        QtCore.QObject.connect(self.ui.start,   QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
         QtCore.QObject.connect(self.ui.stop_2,  QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
+        QtCore.QObject.connect(self.ui.stop_2,  QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
         QtCore.QObject.connect(self.ui.start_2, QtCore.SIGNAL("clicked()"), self.clock2.start_clock)
+        QtCore.QObject.connect(self.ui.start_2, QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
         QtCore.QObject.connect(self.ui.stop_3,  QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
@@ -65,11 +69,11 @@ class timers(QtGui.QMainWindow):
         self.ui.lcdNumber_2.display(str(currentTime2))
 
     def updtTime3(self):
-		if self.clock3.c2 == 0:
-			currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed()/1000)
-		else:
-			currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed() + sum(self.clock3.timlist))/1000)
-			
+        if self.clock3.c2 == 0:
+            currentTime3 = datetime.timedelta(seconds=self.clock3.lcdElapsedTimer.elapsed()/1000)
+        else:
+            currentTime3 = datetime.timedelta(seconds=(self.clock3.lcdElapsedTimer.elapsed() + sum(self.clock3.timelist))/1000)
+
         self.ui.lcdNumber_3.display(str(currentTime3))
 
     def updtTime4(self):
