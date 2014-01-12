@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>599</width>
+    <width>278</width>
     <height>635</height>
    </rect>
   </property>
@@ -82,10 +82,10 @@
    <widget class="QLCDNumber" name="lcdNumber_4">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>30</y>
-      <width>71</width>
-      <height>31</height>
+      <width>81</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -149,9 +149,12 @@
       <height>191</height>
      </rect>
     </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>Task 1</string>
      </attribute>
      <widget class="QSplitter" name="splitter_2">
       <property name="geometry">
@@ -218,14 +221,10 @@
        <string>Duration</string>
       </property>
      </widget>
-     <zorder>splitter</zorder>
-     <zorder>splitter_2</zorder>
-     <zorder>label_2</zorder>
-     <zorder>label_3</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>Task 2</string>
      </attribute>
     </widget>
    </widget>
@@ -248,13 +247,48 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>599</width>
+     <width>278</width>
      <height>26</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuTasks">
+    <property name="title">
+     <string>Tasks</string>
+    </property>
+    <addaction name="actionSelect_Task"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuTasks"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSelect_Task">
+   <property name="text">
+    <string>Select Task</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>317</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>317</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
