@@ -6,6 +6,7 @@ import datetime
 
 from PySide import QtCore, QtGui
 from timeTraceUI import Ui_MainWindow
+from taskpopup import SortedDict, AddressBook
 
 
 class timers(QtGui.QMainWindow):
@@ -13,6 +14,8 @@ class timers(QtGui.QMainWindow):
         super(timers, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.tl = AddressBook()
 
         #self.c2 = 0
         #currentTime2 = 0
@@ -40,6 +43,7 @@ class timers(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.stop_3,  QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
+        QtCore.QObject.connect(self.ui.actionSelect_Task, QtCore.SIGNAL("triggered()"), self.tl.show)
 
         QtCore.QObject.connect(self.clock1.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime)
         QtCore.QObject.connect(self.clock2.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime2)
@@ -49,6 +53,8 @@ class timers(QtGui.QMainWindow):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    def select_task(self):
+        self.tl.show()
 
     def single(self):
         """
