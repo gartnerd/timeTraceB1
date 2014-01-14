@@ -9,6 +9,8 @@
 ##
 #############################################################################
 
+import pickle
+
 from PySide import QtCore, QtGui
 
 
@@ -41,102 +43,396 @@ class SortedDict(dict):
     iterkeys = __iter__
 
 
-class AddressBook(QtGui.QWidget):
+class ChargeCodeCatalog(QtGui.QWidget):
+    NavigationMode, AddingMode, EditingMode = range(3)
+
     def __init__(self, parent=None):
-        super(AddressBook, self).__init__(parent)
+        super(ChargeCodeCatalog, self).__init__(parent)
 
-        self.contacts = SortedDict()
-        self.oldName = ''
+        self.chargecodes = SortedDict()
+        self.oldChargeCode = ''
         self.oldAddress = ''
+        self.currentMode = self.NavigationMode
 
-        nameLabel = QtGui.QLabel("Name:")
-        self.nameLine = QtGui.QLineEdit()
-        self.nameLine.setReadOnly(True)
+        chargeCodeLabel = QtGui.QLabel("Charge Code:")
+        self.chargeCodeLine = QtGui.QLineEdit()
+        self.chargeCodeLine.setReadOnly(True)
 
-        addressLabel = QtGui.QLabel("Address:")
-        self.addressText = QtGui.QTextEdit()
-        self.addressText.setReadOnly(True)
+        chargeCodeDescriptionLabel = QtGui.QLabel("Description:")
+        self.chargeCodeDescriptionText = QtGui.QTextEdit()
+        self.chargeCodeDescriptionText.setReadOnly(True)
 
         self.addButton = QtGui.QPushButton("&Add")
         self.addButton.show()
+        self.editButton = QtGui.QPushButton("&Edit")
+        self.editButton.setEnabled(False)
+        self.removeButton = QtGui.QPushButton("&Remove")
+        self.removeButton.setEnabled(False)
+        self.findButton = QtGui.QPushButton("&Find")
+        self.findButton.setEnabled(False)
         self.submitButton = QtGui.QPushButton("&Submit")
         self.submitButton.hide()
         self.cancelButton = QtGui.QPushButton("&Cancel")
         self.cancelButton.hide()
 
+        self.nextButton = QtGui.QPushButton("&Next")
+        self.nextButton.setEnabled(False)
+        self.previousButton = QtGui.QPushButton("&Previous")
+        self.previousButton.setEnabled(False)
+
+        self.loadButton = QtGui.QPushButton("&Load...")
+        self.loadButton.setToolTip("Load codes from a file")
+        self.saveButton = QtGui.QPushButton("Sa&ve...")
+        self.saveButton.setToolTip("Save codes to a file")
+        self.saveButton.setEnabled(False)
+
+        self.exportButton = QtGui.QPushButton("Ex&port")
+        self.exportButton.setToolTip("Export as vCard")
+        self.exportButton.setEnabled(False)
+
+        self.dialog = FindDialog()
+
         self.addButton.clicked.connect(self.addContact)
         self.submitButton.clicked.connect(self.submitContact)
+        self.editButton.clicked.connect(self.editContact)
+        self.removeButton.clicked.connect(self.removeContact)
+        self.findButton.clicked.connect(self.findContact)
         self.cancelButton.clicked.connect(self.cancel)
+        self.nextButton.clicked.connect(self.next)
+        self.previousButton.clicked.connect(self.previous)
+        self.loadButton.clicked.connect(self.loadFromFile)
+        self.saveButton.clicked.connect(self.saveToFile)
+        self.exportButton.clicked.connect(self.exportAsVCard)
 
         buttonLayout1 = QtGui.QVBoxLayout()
-        buttonLayout1.addWidget(self.addButton, QtCore.Qt.AlignTop)
+        buttonLayout1.addWidget(self.addButton)
+        buttonLayout1.addWidget(self.editButton)
+        buttonLayout1.addWidget(self.removeButton)
+        buttonLayout1.addWidget(self.findButton)
         buttonLayout1.addWidget(self.submitButton)
         buttonLayout1.addWidget(self.cancelButton)
+        buttonLayout1.addWidget(self.loadButton)
+        buttonLayout1.addWidget(self.saveButton)
+        buttonLayout1.addWidget(self.exportButton)
         buttonLayout1.addStretch()
 
+        buttonLayout2 = QtGui.QHBoxLayout()
+        buttonLayout2.addWidget(self.previousButton)
+        buttonLayout2.addWidget(self.nextButton)
+
         mainLayout = QtGui.QGridLayout()
-        mainLayout.addWidget(nameLabel, 0, 0)
-        mainLayout.addWidget(self.nameLine, 0, 1)
-        mainLayout.addWidget(addressLabel, 1, 0, QtCore.Qt.AlignTop)
-        mainLayout.addWidget(self.addressText, 1, 1)
+        mainLayout.addWidget(chargeCodeLabel, 0, 0)
+        mainLayout.addWidget(self.chargeCodeLine, 0, 1)
+        mainLayout.addWidget(chargeCodeDescriptionLabel, 1, 0, QtCore.Qt.AlignTop)
+        mainLayout.addWidget(self.chargeCodeDescriptionText, 1, 1)
         mainLayout.addLayout(buttonLayout1, 1, 2)
+        mainLayout.addLayout(buttonLayout2, 2, 1)
 
         self.setLayout(mainLayout)
-        self.setWindowTitle("Simple Address Book")
+        self.setWindowTitle("Charge Code Search")
 
     def addContact(self):
-        self.oldName = self.nameLine.text()
-        self.oldAddress = self.addressText.toPlainText()
+        self.oldChargeCode = self.chargeCodeLine.text()
+        self.oldAddress = self.chargeCodeDescriptionText.toPlainText()
 
-        self.nameLine.clear()
-        self.addressText.clear()
+        self.chargeCodeLine.clear()
+        self.chargeCodeDescriptionText.clear()
 
-        self.nameLine.setReadOnly(False)
-        self.nameLine.setFocus(QtCore.Qt.OtherFocusReason)
-        self.addressText.setReadOnly(False)
+        self.updateInterface(self.AddingMode)
 
-        self.addButton.setEnabled(False)
-        self.submitButton.show()
-        self.cancelButton.show()
+    def editContact(self):
+        self.oldChargeCode = self.chargeCodeLine.text()
+        self.oldAddress = self.chargeCodeDescriptionText.toPlainText()
+
+        self.updateInterface(self.EditingMode)
 
     def submitContact(self):
-        name = self.nameLine.text()
-        address = self.addressText.toPlainText()
+        name = self.chargeCodeLine.text()
+        address = self.chargeCodeDescriptionText.toPlainText()
 
         if name == "" or address == "":
             QtGui.QMessageBox.information(self, "Empty Field",
-                    "Please enter a name and address.")
+                    "Please add charge code and description.")
             return
 
-        if name not in self.contacts:
-            self.contacts[name] = address
-            QtGui.QMessageBox.information(self, "Add Successful",
-                    "\"%s\" has been added to your address book." % name)
-        else:
-            QtGui.QMessageBox.information(self, "Add Unsuccessful",
-                    "Sorry, \"%s\" is already in your address book." % name)
-            return
+        if self.currentMode == self.AddingMode:
+            if name not in self.chargecodes:
+                self.chargecodes[name] = address
+                QtGui.QMessageBox.information(self, "Add Successful",
+                        "\"%s\" has been added." % name)
+            else:
+                QtGui.QMessageBox.information(self, "Add Unsuccessful",
+                        "Sorry, \"%s\" is already in your catalogue." % name)
+                return
 
-        if not self.contacts:
-            self.nameLine.clear()
-            self.addressText.clear()
+        elif self.currentMode == self.EditingMode:
+            if self.oldChargeCode != name:
+                if name not in self.chargecodes:
+                    QtGui.QMessageBox.information(self, "Edit Successful",
+                            "\"%s\" has been edited in your address book." % self.oldChargeCode)
+                    del self.chargecodes[self.oldChargeCode]
+                    self.chargecodes[name] = address
+                else:
+                    QtGui.QMessageBox.information(self, "Edit Unsuccessful",
+                            "Sorry, \"%s\" is already in your address book." % name)
+                    return
+            elif self.oldAddress != address:
+                QtGui.QMessageBox.information(self, "Edit Successful",
+                        "\"%s\" has been edited in your address book." % name)
+                self.chargecodes[name] = address
 
-        self.nameLine.setReadOnly(True)
-        self.addressText.setReadOnly(True)
-        self.addButton.setEnabled(True)
-        self.submitButton.hide()
-        self.cancelButton.hide()
+        self.updateInterface(self.NavigationMode)
 
     def cancel(self):
-        self.nameLine.setText(self.oldName)
-        self.nameLine.setReadOnly(True)
+        self.chargeCodeLine.setText(self.oldChargeCode)
+        self.chargeCodeDescriptionText.setText(self.oldAddress)
+        self.updateInterface(self.NavigationMode)
 
-        self.addressText.setText(self.oldAddress)
-        self.addressText.setReadOnly(True)
+    def removeContact(self):
+        name = self.chargeCodeLine.text()
+        address = self.chargeCodeDescriptionText.toPlainText()
 
-        self.addButton.setEnabled(True)
-        self.submitButton.hide()
-        self.cancelButton.hide()
+        if name in self.chargecodes:
+            button = QtGui.QMessageBox.question(self, "Confirm Remove",
+                    "Are you sure you want to remove \"%s\"?" % name,
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+
+            if button == QtGui.QMessageBox.Yes:
+                self.previous()
+                del self.chargecodes[name]
+
+                QtGui.QMessageBox.information(self, "Remove Successful",
+                        "\"%s\" has been removed from your address book." % name)
+
+        self.updateInterface(self.NavigationMode)
+
+    def next(self):
+        name = self.chargeCodeLine.text()
+        it = iter(self.chargecodes)
+
+        try:
+            while True:
+                this_name, _ = it.next()
+
+                if this_name == name:
+                    next_name, next_address = it.next()
+                    break
+        except StopIteration:
+            next_name, next_address = iter(self.chargecodes).next()
+
+        self.chargeCodeLine.setText(next_name)
+        self.chargeCodeDescriptionText.setText(next_address)
+
+    def previous(self):
+        name = self.chargeCodeLine.text()
+
+        prev_name = prev_address = None
+        for this_name, this_address in self.chargecodes:
+            if this_name == name:
+                break
+
+            prev_name = this_name
+            prev_address = this_address
+        else:
+            self.chargeCodeLine.clear()
+            self.chargeCodeDescriptionText.clear()
+            return
+
+        if prev_name is None:
+            for prev_name, prev_address in self.chargecodes:
+                pass
+
+        self.chargeCodeLine.setText(prev_name)
+        self.chargeCodeDescriptionText.setText(prev_address)
+
+    def findContact(self):
+        self.dialog.show()
+
+        if self.dialog.exec_() == QtGui.QDialog.Accepted:
+            contactName = self.dialog.getFindText()
+
+            if contactName in self.chargecodes:
+                self.chargeCodeLine.setText(contactName)
+                self.chargeCodeDescriptionText.setText(self.chargecodes[contactName])
+            else:
+                QtGui.QMessageBox.information(self, "Contact Not Found",
+                        "Sorry, \"%s\" is not in your address book." % contactName)
+                return
+
+        self.updateInterface(self.NavigationMode)
+
+    def updateInterface(self, mode):
+        self.currentMode = mode
+
+        if self.currentMode in (self.AddingMode, self.EditingMode):
+            self.chargeCodeLine.setReadOnly(False)
+            self.chargeCodeLine.setFocus(QtCore.Qt.OtherFocusReason)
+            self.chargeCodeDescriptionText.setReadOnly(False)
+
+            self.addButton.setEnabled(False)
+            self.editButton.setEnabled(False)
+            self.removeButton.setEnabled(False)
+
+            self.nextButton.setEnabled(False)
+            self.previousButton.setEnabled(False)
+
+            self.submitButton.show()
+            self.cancelButton.show()
+
+            self.loadButton.setEnabled(False)
+            self.saveButton.setEnabled(False)
+            self.exportButton.setEnabled(False)
+
+        elif self.currentMode == self.NavigationMode:
+            if not self.chargecodes:
+                self.chargeCodeLine.clear()
+                self.chargeCodeDescriptionText.clear()
+
+            self.chargeCodeLine.setReadOnly(True)
+            self.chargeCodeDescriptionText.setReadOnly(True)
+            self.addButton.setEnabled(True)
+
+            number = len(self.chargecodes)
+            self.editButton.setEnabled(number >= 1)
+            self.removeButton.setEnabled(number >= 1)
+            self.findButton.setEnabled(number > 2)
+            self.nextButton.setEnabled(number > 1)
+            self.previousButton.setEnabled(number >1 )
+
+            self.submitButton.hide()
+            self.cancelButton.hide()
+
+            self.exportButton.setEnabled(number >= 1)
+
+            self.loadButton.setEnabled(True)
+            self.saveButton.setEnabled(number >= 1)
+
+    def saveToFile(self):
+        fileName,_ = QtGui.QFileDialog.getSaveFileName(self,
+                "Save Address Book", '',
+                "Address Book (*.abk);;All Files (*)")
+
+        if not fileName:
+            return
+
+        try:
+            out_file = open(str(fileName), 'wb')
+        except IOError:
+            QtGui.QMessageBox.information(self, "Unable to open file",
+                    "There was an error opening \"%s\"" % fileName)
+            return
+
+        pickle.dump(self.chargecodes, out_file)
+        out_file.close()
+
+    def loadFromFile(self):
+        fileName,_ = QtGui.QFileDialog.getOpenFileName(self,
+                "Open Address Book", '',
+                "Address Book (*.abk);;All Files (*)")
+
+        if not fileName:
+            return
+
+        try:
+            in_file = open(str(fileName), 'rb')
+        except IOError:
+            QtGui.QMessageBox.information(self, "Unable to open file",
+                    "There was an error opening \"%s\"" % fileName)
+            return
+
+        self.chargecodes = pickle.load(in_file)
+        in_file.close()
+
+        if len(self.chargecodes) == 0:
+            QtGui.QMessageBox.information(self, "No contacts in file",
+                    "The file you are attempting to open contains no "
+                    "contacts.")
+        else:
+            for name, address in self.chargecodes:
+                self.chargeCodeLine.setText(name)
+                self.chargeCodeDescriptionText.setText(address)
+
+        self.updateInterface(self.NavigationMode)
+
+    def exportAsVCard(self):
+        name = str(self.chargeCodeLine.text())
+        address = self.chargeCodeDescriptionText.toPlainText()
+
+        nameList = name.split()
+
+        if len(nameList) > 1:
+            firstName = nameList[0]
+            lastName = nameList[-1]
+        else:
+            firstName = name
+            lastName = ''
+
+        fileName = QtGui.QFileDialog.getSaveFileName(self, "Export Contact",
+                '', "vCard Files (*.vcf);;All Files (*)")[0]
+
+        if not fileName:
+            return
+
+        out_file = QtCore.QFile(fileName)
+
+        if not out_file.open(QtCore.QIODevice.WriteOnly):
+            QtGui.QMessageBox.information(self, "Unable to open file",
+                    out_file.errorString())
+            return
+
+        out_s = QtCore.QTextStream(out_file)
+
+        out_s << 'BEGIN:VCARD' << '\n'
+        out_s << 'VERSION:2.1' << '\n'
+        out_s << 'N:' << lastName << ';' << firstName << '\n'
+        out_s << 'FN:' << ' '.join(nameList) << '\n'
+
+        address.replace(';', '\\;')
+        address.replace('\n', ';')
+        address.replace(',', ' ')
+
+        out_s << 'ADR;HOME:;' << address << '\n'
+        out_s << 'END:VCARD' << '\n'
+
+        QtGui.QMessageBox.information(self, "Export Successful",
+                "\"%s\" has been exported as a vCard." % name)
+
+
+class FindDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super(FindDialog, self).__init__(parent)
+
+        findChargeCode = QtGui.QLabel("Enter a charge code:")
+        self.lineEdit = QtGui.QLineEdit()
+
+        self.findButton = QtGui.QPushButton("&Find")
+        self.findText = ''
+
+        layout = QtGui.QHBoxLayout()
+        layout.addWidget(findChargeCode)
+        layout.addWidget(self.lineEdit)
+        layout.addWidget(self.findButton)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Find Charge Code")
+
+        self.findButton.clicked.connect(self.findClicked)
+        self.findButton.clicked.connect(self.accept)
+
+    def findClicked(self):
+        text = self.lineEdit.text()
+
+        if not text:
+            QtGui.QMessageBox.information(self, "Empty Field",
+                    "Please enter a charge code.")
+            return
+
+        self.findText = text
+        self.lineEdit.clear()
+        self.hide()
+
+    def getFindText(self):
+        return self.findText
 
 
 if __name__ == '__main__':
@@ -144,7 +440,7 @@ if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
 
-    addressBook = AddressBook()
+    addressBook = ChargeCodeCatalog()
     addressBook.show()
 
     sys.exit(app.exec_())
