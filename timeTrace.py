@@ -6,7 +6,7 @@ import datetime
 
 from PySide import QtCore, QtGui
 from timeTraceUI import Ui_MainWindow
-from taskpopup import SortedDict, AddressBook
+from taskpopup import SortedDict, ChargeCodeCatalog
 
 
 class timers(QtGui.QMainWindow):
@@ -15,7 +15,7 @@ class timers(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.tl = AddressBook()
+        self.tl = ChargeCodeCatalog()
 
         #self.c2 = 0
         #currentTime2 = 0
