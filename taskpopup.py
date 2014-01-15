@@ -51,7 +51,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
         self.chargecodes = SortedDict()
         self.oldChargeCode = ''
-        self.oldAddress = ''
+        self.oldChargeCodeDescriptioin = ''
         self.currentMode = self.NavigationMode
 
         chargeCodeLabel = QtGui.QLabel("Charge Code:")
@@ -129,11 +129,11 @@ class ChargeCodeCatalog(QtGui.QWidget):
         mainLayout.addLayout(buttonLayout2, 2, 1)
 
         self.setLayout(mainLayout)
-        self.setWindowTitle("Charge Code Search")
+        self.setWindowTitle("Charge Codes")
 
     def addContact(self):
         self.oldChargeCode = self.chargeCodeLine.text()
-        self.oldAddress = self.chargeCodeDescriptionText.toPlainText()
+        self.oldChargeCodeDescriptioin = self.chargeCodeDescriptionText.toPlainText()
 
         self.chargeCodeLine.clear()
         self.chargeCodeDescriptionText.clear()
@@ -142,107 +142,107 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
     def editContact(self):
         self.oldChargeCode = self.chargeCodeLine.text()
-        self.oldAddress = self.chargeCodeDescriptionText.toPlainText()
+        self.oldChargeCodeDescriptioin = self.chargeCodeDescriptionText.toPlainText()
 
         self.updateInterface(self.EditingMode)
 
     def submitContact(self):
-        name = self.chargeCodeLine.text()
+        chargeCode = self.chargeCodeLine.text()
         address = self.chargeCodeDescriptionText.toPlainText()
 
-        if name == "" or address == "":
+        if chargeCode == "" or address == "":
             QtGui.QMessageBox.information(self, "Empty Field",
                     "Please add charge code and description.")
             return
 
         if self.currentMode == self.AddingMode:
-            if name not in self.chargecodes:
-                self.chargecodes[name] = address
+            if chargeCode not in self.chargecodes:
+                self.chargecodes[chargeCode] = address
                 QtGui.QMessageBox.information(self, "Add Successful",
-                        "\"%s\" has been added." % name)
+                        "\"%s\" has been added." % chargeCode)
             else:
                 QtGui.QMessageBox.information(self, "Add Unsuccessful",
-                        "Sorry, \"%s\" is already in your catalogue." % name)
+                        "Sorry, \"%s\" is already in your catalogue." % chargeCode)
                 return
 
         elif self.currentMode == self.EditingMode:
-            if self.oldChargeCode != name:
-                if name not in self.chargecodes:
+            if self.oldChargeCode != chargeCode:
+                if chargeCode not in self.chargecodes:
                     QtGui.QMessageBox.information(self, "Edit Successful",
                             "\"%s\" has been edited in your address book." % self.oldChargeCode)
                     del self.chargecodes[self.oldChargeCode]
-                    self.chargecodes[name] = address
+                    self.chargecodes[chargeCode] = address
                 else:
                     QtGui.QMessageBox.information(self, "Edit Unsuccessful",
-                            "Sorry, \"%s\" is already in your address book." % name)
+                            "Sorry, \"%s\" is already in your address book." % chargeCode)
                     return
-            elif self.oldAddress != address:
+            elif self.oldChargeCodeDescriptioin != address:
                 QtGui.QMessageBox.information(self, "Edit Successful",
-                        "\"%s\" has been edited in your address book." % name)
-                self.chargecodes[name] = address
+                        "\"%s\" has been edited in your address book." % chargeCode)
+                self.chargecodes[chargeCode] = address
 
         self.updateInterface(self.NavigationMode)
 
     def cancel(self):
         self.chargeCodeLine.setText(self.oldChargeCode)
-        self.chargeCodeDescriptionText.setText(self.oldAddress)
+        self.chargeCodeDescriptionText.setText(self.oldChargeCodeDescriptioin)
         self.updateInterface(self.NavigationMode)
 
     def removeContact(self):
-        name = self.chargeCodeLine.text()
+        chargeCode = self.chargeCodeLine.text()
         address = self.chargeCodeDescriptionText.toPlainText()
 
-        if name in self.chargecodes:
+        if chargeCode in self.chargecodes:
             button = QtGui.QMessageBox.question(self, "Confirm Remove",
-                    "Are you sure you want to remove \"%s\"?" % name,
+                    "Are you sure you want to remove \"%s\"?" % chargeCode,
                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
 
             if button == QtGui.QMessageBox.Yes:
                 self.previous()
-                del self.chargecodes[name]
+                del self.chargecodes[chargeCode]
 
                 QtGui.QMessageBox.information(self, "Remove Successful",
-                        "\"%s\" has been removed from your address book." % name)
+                        "\"%s\" has been removed from your address book." % chargeCode)
 
         self.updateInterface(self.NavigationMode)
 
     def next(self):
-        name = self.chargeCodeLine.text()
+        chargeCode = self.chargeCodeLine.text()
         it = iter(self.chargecodes)
 
         try:
             while True:
-                this_name, _ = it.next()
+                this_chargeCode, _ = it.next()
 
-                if this_name == name:
-                    next_name, next_address = it.next()
+                if this_chargeCode == chargeCode:
+                    next_chargeCode, next_address = it.next()
                     break
         except StopIteration:
-            next_name, next_address = iter(self.chargecodes).next()
+            next_chargeCode, next_address = iter(self.chargecodes).next()
 
-        self.chargeCodeLine.setText(next_name)
+        self.chargeCodeLine.setText(next_chargeCode)
         self.chargeCodeDescriptionText.setText(next_address)
 
     def previous(self):
-        name = self.chargeCodeLine.text()
+        chargeCode = self.chargeCodeLine.text()
 
-        prev_name = prev_address = None
-        for this_name, this_address in self.chargecodes:
-            if this_name == name:
+        prev_chargeCode = prev_address = None
+        for this_chargeCode, this_address in self.chargecodes:
+            if this_chargeCode == chargeCode:
                 break
 
-            prev_name = this_name
+            prev_chargeCode = this_chargeCode
             prev_address = this_address
         else:
             self.chargeCodeLine.clear()
             self.chargeCodeDescriptionText.clear()
             return
 
-        if prev_name is None:
-            for prev_name, prev_address in self.chargecodes:
+        if prev_chargeCode is None:
+            for prev_chargeCode, prev_address in self.chargecodes:
                 pass
 
-        self.chargeCodeLine.setText(prev_name)
+        self.chargeCodeLine.setText(prev_chargeCode)
         self.chargeCodeDescriptionText.setText(prev_address)
 
     def findContact(self):
@@ -348,9 +348,9 @@ class ChargeCodeCatalog(QtGui.QWidget):
                     "The file you are attempting to open contains no "
                     "contacts.")
         else:
-            for name, address in self.chargecodes:
-                self.chargeCodeLine.setText(name)
-                self.chargeCodeDescriptionText.setText(address)
+            for chargeCode, chargeCodeDescription in self.chargecodes:
+                self.chargeCodeLine.setText(chargeCode)
+                self.chargeCodeDescriptionText.setText(chargeCodeDescription)
 
         self.updateInterface(self.NavigationMode)
 

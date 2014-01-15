@@ -50,7 +50,6 @@ class timers(QtGui.QMainWindow):
         QtCore.QObject.connect(self.clock3.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime3)
         QtCore.QObject.connect(self.lcdTime, QtCore.SIGNAL("timeout()"), self.updtTime4)
 
-
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def select_task(self):
