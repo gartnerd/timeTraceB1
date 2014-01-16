@@ -58,6 +58,10 @@ class ChargeCodeCatalog(QtGui.QWidget):
         self.chargeCodeLine = QtGui.QLineEdit()
         self.chargeCodeLine.setReadOnly(True)
 
+        taskCodeLabel = QtGui.QLabel("Task Code:")
+        self.taskCodeLine = QtGui.QLineEdit()
+        self.taskCodeLine.setReadOnly(True)
+
         chargeCodeDescriptionLabel = QtGui.QLabel("Description:")
         self.chargeCodeDescriptionText = QtGui.QTextEdit()
         self.chargeCodeDescriptionText.setReadOnly(True)
@@ -123,10 +127,12 @@ class ChargeCodeCatalog(QtGui.QWidget):
         mainLayout = QtGui.QGridLayout()
         mainLayout.addWidget(chargeCodeLabel, 0, 0)
         mainLayout.addWidget(self.chargeCodeLine, 0, 1)
-        mainLayout.addWidget(chargeCodeDescriptionLabel, 1, 0, QtCore.Qt.AlignTop)
-        mainLayout.addWidget(self.chargeCodeDescriptionText, 1, 1)
+        mainLayout.addWidget(taskCodeLabel, 1, 0)
+        mainLayout.addWidget(self.taskCodeLine, 1, 1)
+        mainLayout.addWidget(chargeCodeDescriptionLabel, 2, 0)
+        mainLayout.addWidget(self.chargeCodeDescriptionText, 2, 1)
         mainLayout.addLayout(buttonLayout1, 1, 2)
-        mainLayout.addLayout(buttonLayout2, 2, 1)
+        #mainLayout.addLayout(buttonLayout2, 2, 1)
 
         self.setLayout(mainLayout)
         self.setWindowTitle("Charge Codes")
