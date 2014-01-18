@@ -51,7 +51,8 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
         self.chargecodes = SortedDict()
         self.oldChargeCode = ''
-        self.oldChargeCodeDescriptioin = ''
+        self.oldTaskCode = ''
+        self.oldChargeCodeDescription = ''
         self.currentMode = self.NavigationMode
 
         chargeCodeLabel = QtGui.QLabel("Charge Code:")
@@ -131,7 +132,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
         mainLayout.addWidget(self.taskCodeLine, 1, 1, 1, 1)
         mainLayout.addWidget(chargeCodeDescriptionLabel, 2, 0, 1, 1)
         mainLayout.addWidget(self.chargeCodeDescriptionText, 2, 1, 1, 1)
-        mainLayout.addLayout(buttonLayout1, 0, 2)
+        mainLayout.addLayout(buttonLayout1, 2, 2)
         mainLayout.addLayout(buttonLayout2, 3, 1)
 
         self.setLayout(mainLayout)
@@ -139,26 +140,30 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
     def addContact(self):
         self.oldChargeCode = self.chargeCodeLine.text()
-        self.oldChargeCodeDescriptioin = self.chargeCodeDescriptionText.toPlainText()
+        self.oldTaskCode = self.taskCodeLine.text()
+        self.oldChargeCodeDescription = self.chargeCodeDescriptionText.toPlainText()
 
         self.chargeCodeLine.clear()
+        self.taskCodeLine.clear()
         self.chargeCodeDescriptionText.clear()
 
         self.updateInterface(self.AddingMode)
 
     def editContact(self):
         self.oldChargeCode = self.chargeCodeLine.text()
-        self.oldChargeCodeDescriptioin = self.chargeCodeDescriptionText.toPlainText()
+        self.oldTaskCode = self.taskCodeLine.text()
+        self.oldChargeCodeDescription = self.chargeCodeDescriptionText.toPlainText()
 
         self.updateInterface(self.EditingMode)
 
     def submitContact(self):
         chargeCode = self.chargeCodeLine.text()
+        taskCode = self.taskCodeLine.text()
         address = self.chargeCodeDescriptionText.toPlainText()
 
-        if chargeCode == "" or address == "":
+        if chargeCode == "" or taskCode == "" or address == "":
             QtGui.QMessageBox.information(self, "Empty Field",
-                    "Please add charge code and description.")
+                    "Please add charge code, task code and a description.")
             return
 
         if self.currentMode == self.AddingMode:
@@ -168,30 +173,31 @@ class ChargeCodeCatalog(QtGui.QWidget):
                         "\"%s\" has been added." % chargeCode)
             else:
                 QtGui.QMessageBox.information(self, "Add Unsuccessful",
-                        "Sorry, \"%s\" is already in your catalogue." % chargeCode)
+                        "Sorry, \"%s\" is already stored." % chargeCode)
                 return
 
         elif self.currentMode == self.EditingMode:
             if self.oldChargeCode != chargeCode:
                 if chargeCode not in self.chargecodes:
                     QtGui.QMessageBox.information(self, "Edit Successful",
-                            "\"%s\" has been edited in your address book." % self.oldChargeCode)
+                            "\"%s\" has been updated." % self.oldChargeCode)
                     del self.chargecodes[self.oldChargeCode]
                     self.chargecodes[chargeCode] = address
                 else:
                     QtGui.QMessageBox.information(self, "Edit Unsuccessful",
-                            "Sorry, \"%s\" is already in your address book." % chargeCode)
+                            "Sorry, \"%s\" is already stored." % chargeCode)
                     return
-            elif self.oldChargeCodeDescriptioin != address:
+            elif self.oldChargeCodeDescription != address:
                 QtGui.QMessageBox.information(self, "Edit Successful",
-                        "\"%s\" has been edited in your address book." % chargeCode)
+                        "\"%s\" has been updated." % chargeCode)
                 self.chargecodes[chargeCode] = address
 
         self.updateInterface(self.NavigationMode)
 
     def cancel(self):
         self.chargeCodeLine.setText(self.oldChargeCode)
-        self.chargeCodeDescriptionText.setText(self.oldChargeCodeDescriptioin)
+        self.taskCodeLine.setText(self.oldTaskCode)
+        self.chargeCodeDescriptionText.setText(self.oldChargeCodeDescription)
         self.updateInterface(self.NavigationMode)
 
     def removeContact(self):
@@ -273,6 +279,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
         if self.currentMode in (self.AddingMode, self.EditingMode):
             self.chargeCodeLine.setReadOnly(False)
             self.chargeCodeLine.setFocus(QtCore.Qt.OtherFocusReason)
+            self.taskCodeLine.setReadOnly(False)
             self.chargeCodeDescriptionText.setReadOnly(False)
 
             self.addButton.setEnabled(False)
@@ -292,9 +299,11 @@ class ChargeCodeCatalog(QtGui.QWidget):
         elif self.currentMode == self.NavigationMode:
             if not self.chargecodes:
                 self.chargeCodeLine.clear()
+                self.taskCodeLine.clear()
                 self.chargeCodeDescriptionText.clear()
 
             self.chargeCodeLine.setReadOnly(True)
+            self.taskCodeLine.setReadOnly(True)
             self.chargeCodeDescriptionText.setReadOnly(True)
             self.addButton.setEnabled(True)
 
