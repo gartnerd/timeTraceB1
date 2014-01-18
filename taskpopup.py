@@ -159,16 +159,16 @@ class ChargeCodeCatalog(QtGui.QWidget):
     def submitContact(self):
         chargeCode = self.chargeCodeLine.text()
         taskCode = self.taskCodeLine.text()
-        address = self.chargeCodeDescriptionText.toPlainText()
+        description = self.chargeCodeDescriptionText.toPlainText()
 
-        if chargeCode == "" or taskCode == "" or address == "":
+        if chargeCode == "" or taskCode == "" or description == "":
             QtGui.QMessageBox.information(self, "Empty Field",
                     "Please add charge code, task code and a description.")
             return
 
         if self.currentMode == self.AddingMode:
             if chargeCode not in self.chargecodes:
-                self.chargecodes[chargeCode] = address
+                self.chargecodes[chargeCode] = description
                 QtGui.QMessageBox.information(self, "Add Successful",
                         "\"%s\" has been added." % chargeCode)
             else:
@@ -182,15 +182,15 @@ class ChargeCodeCatalog(QtGui.QWidget):
                     QtGui.QMessageBox.information(self, "Edit Successful",
                             "\"%s\" has been updated." % self.oldChargeCode)
                     del self.chargecodes[self.oldChargeCode]
-                    self.chargecodes[chargeCode] = address
+                    self.chargecodes[chargeCode] = description
                 else:
                     QtGui.QMessageBox.information(self, "Edit Unsuccessful",
                             "Sorry, \"%s\" is already stored." % chargeCode)
                     return
-            elif self.oldChargeCodeDescription != address:
+            elif self.oldChargeCodeDescription != description:
                 QtGui.QMessageBox.information(self, "Edit Successful",
                         "\"%s\" has been updated." % chargeCode)
-                self.chargecodes[chargeCode] = address
+                self.chargecodes[chargeCode] = description
 
         self.updateInterface(self.NavigationMode)
 
@@ -202,7 +202,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
     def removeContact(self):
         chargeCode = self.chargeCodeLine.text()
-        address = self.chargeCodeDescriptionText.toPlainText()
+        #address = self.chargeCodeDescriptionText.toPlainText()
 
         if chargeCode in self.chargecodes:
             button = QtGui.QMessageBox.question(self, "Confirm Remove",
