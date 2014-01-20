@@ -3,6 +3,7 @@
 import sys
 import time
 import datetime
+import connection
 
 from PySide import QtCore, QtGui
 from timeTraceUI import Ui_MainWindow
@@ -111,6 +112,9 @@ class StartStopClock(object):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
+    if not connection.createConnection():
+        sys.exit(1)
+
     myapp = timers()
     myapp.show()
     sys.exit(app.exec_())
