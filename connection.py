@@ -38,5 +38,5 @@ def createConnection():
     
     query = QtSql.QSqlQuery()
     query.exec_("create table chargeCodes(id int primary key, "
-                "chargecode varchar(20), taskcode varchar(20))")
+                "chargecode varchar, taskcode varchar, description varchar)")
     return True
