@@ -5,7 +5,7 @@ import time
 import datetime
 import connection
 
-from PySide import QtCore, QtGui
+from PySide import QtCore, QtGui, QtSql
 from timeTraceUI import Ui_MainWindow
 from taskpopup import SortedDict, ChargeCodeCatalog
 
@@ -110,10 +110,34 @@ class StartStopClock(object):
         self.lcdTimer.stop()
 
 
+def initializeModel(model):
+    model.setTable("chargeCodes")
+
+    model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
+    model.select()
+
+    model.setHeaderData(0, QtCore.Qt.Horizontal, "ID")
+    model.setHeaderData(1, QtCore.Qt.Horizontal, "Charge Code")
+    model.setHeaderData(2, QtCore.Qt.Horizontal, "Task Code")
+    model.setHeaderData(3, QtCore.Qt.Horizontal, "Description")
+
+
+def createView(title, model):
+    view = QtGui.QTableView()
+    view.setModel(model)
+    view.setWindowTitle(title)
+    return view
+
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     if not connection.createConnection():
         sys.exit(1)
+
+    model = QtSql.QSqlTableModel()
+    initializeModel(model)
+
+    view1 = createView("Charge Code Table Model", model)
+    view1.show()
 
     myapp = timers()
     myapp.show()
