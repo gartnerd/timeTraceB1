@@ -11,7 +11,7 @@
 
 import pickle
 
-from PySide import QtCore, QtGui
+from PySide import QtCore, QtGui, QtSql
 
 
 class SortedDict(dict):
@@ -48,6 +48,8 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(ChargeCodeCatalog, self).__init__(parent)
+
+        self.myRecord = QtSql.QSqlRecord()
 
         self.chargecodes = SortedDict()
         self.oldChargeCode = ''
@@ -91,9 +93,9 @@ class ChargeCodeCatalog(QtGui.QWidget):
         self.saveButton.setToolTip("Save codes to a file")
         self.saveButton.setEnabled(False)
 
-        self.exportButton = QtGui.QPushButton("Ex&port")
-        self.exportButton.setToolTip("Export as vCard")
-        self.exportButton.setEnabled(False)
+#        self.exportButton = QtGui.QPushButton("Ex&port")
+#        self.exportButton.setToolTip("Export as vCard")
+#        self.exportButton.setEnabled(False)
 
         self.dialog = FindDialog()
 
@@ -107,7 +109,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
         self.previousButton.clicked.connect(self.previous)
         self.loadButton.clicked.connect(self.loadFromFile)
         self.saveButton.clicked.connect(self.saveToFile)
-        self.exportButton.clicked.connect(self.exportAsVCard)
+#        self.exportButton.clicked.connect(self.exportAsVCard)
 
         buttonLayout1 = QtGui.QVBoxLayout()
         buttonLayout1.addWidget(self.addButton)
@@ -118,7 +120,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
         buttonLayout1.addWidget(self.cancelButton)
         buttonLayout1.addWidget(self.loadButton)
         buttonLayout1.addWidget(self.saveButton)
-        buttonLayout1.addWidget(self.exportButton)
+#        buttonLayout1.addWidget(self.exportButton)
         buttonLayout1.addStretch()
 
         buttonLayout2 = QtGui.QHBoxLayout()
@@ -168,6 +170,10 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
         if self.currentMode == self.AddingMode:
             if chargeCode not in self.chargecodes:
+                self.myRecord.append(chargeCode)
+                self.myRecord.append(taskCode)
+                self.myRecord.append(description)
+                model.insertRecord(-1, self.myRecord)
                 self.chargecodes[chargeCode] = description
                 QtGui.QMessageBox.information(self, "Add Successful",
                         "\"%s\" has been added." % chargeCode)
@@ -294,7 +300,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
             self.loadButton.setEnabled(False)
             self.saveButton.setEnabled(False)
-            self.exportButton.setEnabled(False)
+#            self.exportButton.setEnabled(False)
 
         elif self.currentMode == self.NavigationMode:
             if not self.chargecodes:
@@ -317,7 +323,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
             self.submitButton.hide()
             self.cancelButton.hide()
 
-            self.exportButton.setEnabled(number >= 1)
+#            self.exportButton.setEnabled(number >= 1)
 
             self.loadButton.setEnabled(True)
             self.saveButton.setEnabled(number >= 1)
@@ -369,48 +375,48 @@ class ChargeCodeCatalog(QtGui.QWidget):
 
         self.updateInterface(self.NavigationMode)
 
-    def exportAsVCard(self):
-        name = str(self.chargeCodeLine.text())
-        address = self.chargeCodeDescriptionText.toPlainText()
-
-        nameList = name.split()
-
-        if len(nameList) > 1:
-            firstName = nameList[0]
-            lastName = nameList[-1]
-        else:
-            firstName = name
-            lastName = ''
-
-        fileName = QtGui.QFileDialog.getSaveFileName(self, "Export Contact",
-                '', "vCard Files (*.vcf);;All Files (*)")[0]
-
-        if not fileName:
-            return
-
-        out_file = QtCore.QFile(fileName)
-
-        if not out_file.open(QtCore.QIODevice.WriteOnly):
-            QtGui.QMessageBox.information(self, "Unable to open file",
-                    out_file.errorString())
-            return
-
-        out_s = QtCore.QTextStream(out_file)
-
-        out_s << 'BEGIN:VCARD' << '\n'
-        out_s << 'VERSION:2.1' << '\n'
-        out_s << 'N:' << lastName << ';' << firstName << '\n'
-        out_s << 'FN:' << ' '.join(nameList) << '\n'
-
-        address.replace(';', '\\;')
-        address.replace('\n', ';')
-        address.replace(',', ' ')
-
-        out_s << 'ADR;HOME:;' << address << '\n'
-        out_s << 'END:VCARD' << '\n'
-
-        QtGui.QMessageBox.information(self, "Export Successful",
-                "\"%s\" has been exported as a vCard." % name)
+    # def exportAsVCard(self):
+    #     name = str(self.chargeCodeLine.text())
+    #     address = self.chargeCodeDescriptionText.toPlainText()
+    #
+    #     nameList = name.split()
+    #
+    #     if len(nameList) > 1:
+    #         firstName = nameList[0]
+    #         lastName = nameList[-1]
+    #     else:
+    #         firstName = name
+    #         lastName = ''
+    #
+    #     fileName = QtGui.QFileDialog.getSaveFileName(self, "Export Contact",
+    #             '', "vCard Files (*.vcf);;All Files (*)")[0]
+    #
+    #     if not fileName:
+    #         return
+    #
+    #     out_file = QtCore.QFile(fileName)
+    #
+    #     if not out_file.open(QtCore.QIODevice.WriteOnly):
+    #         QtGui.QMessageBox.information(self, "Unable to open file",
+    #                 out_file.errorString())
+    #         return
+    #
+    #     out_s = QtCore.QTextStream(out_file)
+    #
+    #     out_s << 'BEGIN:VCARD' << '\n'
+    #     out_s << 'VERSION:2.1' << '\n'
+    #     out_s << 'N:' << lastName << ';' << firstName << '\n'
+    #     out_s << 'FN:' << ' '.join(nameList) << '\n'
+    #
+    #     address.replace(';', '\\;')
+    #     address.replace('\n', ';')
+    #     address.replace(',', ' ')
+    #
+    #     out_s << 'ADR;HOME:;' << address << '\n'
+    #     out_s << 'END:VCARD' << '\n'
+    #
+    #     QtGui.QMessageBox.information(self, "Export Successful",
+    #             "\"%s\" has been exported as a vCard." % name)
 
 
 class FindDialog(QtGui.QDialog):
