@@ -110,23 +110,6 @@ class StartStopClock(object):
         self.lcdTimer.stop()
 
 
-def initializeModel(model):
-    model.setTable("chargeCodes")
-
-    model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
-    model.select()
-
-    model.setHeaderData(0, QtCore.Qt.Horizontal, "ID")
-    model.setHeaderData(1, QtCore.Qt.Horizontal, "Charge Code")
-    model.setHeaderData(2, QtCore.Qt.Horizontal, "Task Code")
-    model.setHeaderData(3, QtCore.Qt.Horizontal, "Description")
-
-
-def createView(title, model):
-    view = QtGui.QTableView()
-    view.setModel(model)
-    view.setWindowTitle(title)
-    return view
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
@@ -134,11 +117,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     model = QtSql.QSqlTableModel()
-    initializeModel(model)
+    connection.initializeModel(model)
 
-    view1 = createView("Charge Code Table Model", model)
+    view1 = connection.createView("Charge Code Table Model", model)
     view1.show()
 
     myapp = timers()
     myapp.show()
     sys.exit(app.exec_())
+
+#PySide.QtSql.QSqlTableModel.insertRecord(row, record) record is a QSqlRecord thing
+#PySide.QtSql.QSqlRecord(other)
