@@ -38,5 +38,23 @@ def createConnection():
     
     query = QtSql.QSqlQuery()
     query.exec_("create table chargeCodes(id int primary key, "
-                "chargecode varchar, taskcode varchar, description varchar)")
+                "timelog integer, chargecode text, taskcode text, description text)")
     return True
+
+def initializeModel(model):
+    model.setTable("chargeCodes")
+
+    model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
+    model.select()
+
+    model.setHeaderData(0, QtCore.Qt.Horizontal, "ID")
+    model.setHeaderData(1, QtCore.Qt.Horizontal, "Time Log")
+    model.setHeaderData(2, QtCore.Qt.Horizontal, "Charge Code")
+    model.setHeaderData(3, QtCore.Qt.Horizontal, "Task Code")
+    model.setHeaderData(4, QtCore.Qt.Horizontal, "Description")
+
+def createView(title, model):
+    view = QtGui.QTableView()
+    view.setModel(model)
+    view.setWindowTitle(title)
+    return view
