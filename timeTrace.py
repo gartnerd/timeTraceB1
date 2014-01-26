@@ -8,15 +8,17 @@ import connection
 from PySide import QtCore, QtGui, QtSql
 from timeTraceUI import Ui_MainWindow
 from taskpopup import SortedDict, ChargeCodeCatalog
+from cachedtable import TableEditor
 
 
 class timers(QtGui.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, database, tableName, parent=None):
         super(timers, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.tl = ChargeCodeCatalog()
+#        self.tl = ChargeCodeCatalog()
+        self.timeCodes = TableEditor(database, tableName)
 
         #self.c2 = 0
         #currentTime2 = 0
@@ -44,7 +46,7 @@ class timers(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.stop_3,  QtCore.SIGNAL("clicked()"), self.clock3.stop_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock3.start_clock)
         QtCore.QObject.connect(self.ui.start_3, QtCore.SIGNAL("clicked()"), self.clock2.stop_clock)
-        QtCore.QObject.connect(self.ui.actionSelect_Task, QtCore.SIGNAL("triggered()"), self.tl.show)
+        QtCore.QObject.connect(self.ui.actionSelect_Task, QtCore.SIGNAL("triggered()"), self.timeCodes.show)
 
         QtCore.QObject.connect(self.clock1.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime)
         QtCore.QObject.connect(self.clock2.lcdTimer, QtCore.SIGNAL("timeout()"), self.updtTime2)
@@ -116,13 +118,15 @@ if __name__ == "__main__":
     if not connection.createConnection():
         sys.exit(1)
 
-    model = QtSql.QSqlTableModel()
-    connection.initializeModel(model)
+#    model = QtSql.QSqlTableModel()
+#    db = connection.initializeModel(model)
 
-    view1 = connection.createView("Charge Code Table Model", model)
-    view1.show()
+#    view1 = connection.createView("Charge Code Table Model", model)
+ #   view1.show()
 
-    myapp = timers()
+    db, tableName = connection.createConnection()
+
+    myapp = timers(db, tableName)
     myapp.show()
     sys.exit(app.exec_())
 
