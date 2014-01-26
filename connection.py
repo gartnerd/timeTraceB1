@@ -1,4 +1,4 @@
-#!/bin/env python
+
 
 ############################################################################
 ##
@@ -27,34 +27,26 @@ from PySide import QtSql, QtGui
 
 
 def createConnection():
-    db = QtSql.QSqlDatabase.addDatabase("QSQLITE")
+    db = QtSql.QSqlDatabase.addDatabase("QSQLITE", "cdb")
     db.setDatabaseName(":memory:")
     if not db.open():
         QtGui.QMessageBox.critical(None, QtGui.qApp.tr("Cannot open database"),
                 QtGui.qApp.tr("Unable to establish a database connection.\n"
-                              "This program requires SQLite.\n\nClick Cancel to exit."),
+                              "This example needs SQLite support. Please read "
+                              "the Qt SQL driver documentation for information "
+                              "how to build it.\n\nClick Cancel to exit."),
                 QtGui.QMessageBox.Cancel, QtGui.QMessageBox.NoButton)
         return False
-    
-    query = QtSql.QSqlQuery()
+
+    tableName = "chargeCodes"
+
+    query = QtSql.QSqlQuery(db)
     query.exec_("create table chargeCodes(id int primary key, "
-                "timelog integer, chargecode text, taskcode text, description text)")
-    return True
+                "timeLog integer, chargeCode text, taskCode text, description text)")
+#    query.exec_("insert into person values(101, 'Danny', 'Young')")
+#    query.exec_("insert into person values(102, 'Christine', 'Holand')")
+#    query.exec_("insert into person values(103, 'Lars', 'Gordon')")
+#    query.exec_("insert into person values(104, 'Roberto', 'Robitaille')")
+#    query.exec_("insert into person values(105, 'Maria', 'Papadopoulos')")
 
-def initializeModel(model):
-    model.setTable("chargeCodes")
-
-    model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
-    model.select()
-
-    model.setHeaderData(0, QtCore.Qt.Horizontal, "ID")
-    model.setHeaderData(1, QtCore.Qt.Horizontal, "Time Log")
-    model.setHeaderData(2, QtCore.Qt.Horizontal, "Charge Code")
-    model.setHeaderData(3, QtCore.Qt.Horizontal, "Task Code")
-    model.setHeaderData(4, QtCore.Qt.Horizontal, "Description")
-
-def createView(title, model):
-    view = QtGui.QTableView()
-    view.setModel(model)
-    view.setWindowTitle(title)
-    return view
+    return db, tableName
