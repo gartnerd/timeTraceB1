@@ -111,12 +111,10 @@ class StartStopClock(object):
         self.timelist.append(self.lcdElapsedTimer.elapsed())
         self.lcdTimer.stop()
 
-
-
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    if not connection.createConnection():
-        sys.exit(1)
+#    if not connection.createConnection():
+#        sys.exit(1)
 
 #    model = QtSql.QSqlTableModel()
 #    db = connection.initializeModel(model)
