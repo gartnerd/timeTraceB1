@@ -24,7 +24,7 @@
 ############################################################################
 
 from PySide import QtSql, QtGui
-
+#
 
 def createConnection():
     db = QtSql.QSqlDatabase.addDatabase("QSQLITE", "cdb")
