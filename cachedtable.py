@@ -26,13 +26,14 @@
 from PySide import QtCore, QtGui, QtSql
 
 #import connection
-
+from taskpopup import ChargeCodeCatalog
 
 class TableEditor(QtGui.QDialog):
     def __init__(self, database, tableName, parent=None):
         super(TableEditor, self).__init__(parent)
 
-        self.model = QtSql.QSqlTableModel(self, database)
+        self.db = database
+        self.model = QtSql.QSqlTableModel(self, self.db)
         self.model.setTable(tableName)
         self.model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
         self.model.select()
@@ -46,14 +47,17 @@ class TableEditor(QtGui.QDialog):
 
         submitButton = QtGui.QPushButton("Submit")
         submitButton.setDefault(True)
+        plusButton = QtGui.QPushButton("Add")
         revertButton = QtGui.QPushButton("&Revert")
         quitButton = QtGui.QPushButton("Quit")
 
         buttonBox = QtGui.QDialogButtonBox(QtCore.Qt.Vertical)
+        buttonBox.addButton(plusButton, QtGui.QDialogButtonBox.ActionRole)
         buttonBox.addButton(submitButton, QtGui.QDialogButtonBox.ActionRole)
         buttonBox.addButton(revertButton, QtGui.QDialogButtonBox.ActionRole)
         buttonBox.addButton(quitButton, QtGui.QDialogButtonBox.RejectRole)
 
+        plusButton.clicked.connect(self.addPopup)
         submitButton.clicked.connect(self.submit)
         revertButton.clicked.connect(self.model.revertAll)
         quitButton.clicked.connect(self.close)
@@ -74,6 +78,9 @@ class TableEditor(QtGui.QDialog):
             QtGui.QMessageBox.warning(self, "Cached Table",
                         "The database reported an error: %s" % self.model.lastError().text())
 
+    def addPopup(self):
+        self.popUp = ChargeCodeCatalog(self.db)
+        self.popUp.show()
 
 if __name__ == '__main__':
 
