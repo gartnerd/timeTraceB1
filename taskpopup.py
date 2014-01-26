@@ -46,11 +46,11 @@ class SortedDict(dict):
 class ChargeCodeCatalog(QtGui.QWidget):
     NavigationMode, AddingMode, EditingMode = range(3)
 
-    def __init__(self, parent=None):
+    def __init__(self, database, parent=None):
         super(ChargeCodeCatalog, self).__init__(parent)
 
         self.myRecord = QtSql.QSqlRecord()
-
+        self.db = database
         self.chargecodes = SortedDict()
         self.oldChargeCode = ''
         self.oldTaskCode = ''
@@ -173,7 +173,7 @@ class ChargeCodeCatalog(QtGui.QWidget):
                 self.myRecord.append(chargeCode)
                 self.myRecord.append(taskCode)
                 self.myRecord.append(description)
-                model.insertRecord(-1, self.myRecord)
+                self.db.insertRecord(-1, self.myRecord)
                 self.chargecodes[chargeCode] = description
                 QtGui.QMessageBox.information(self, "Add Successful",
                         "\"%s\" has been added." % chargeCode)
